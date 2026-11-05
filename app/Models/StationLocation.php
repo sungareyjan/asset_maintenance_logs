@@ -13,4 +13,6 @@ class StationLocation extends Model
         'station',
         'address',
     ];
+
+    protected $hidden = ['id'];
 }

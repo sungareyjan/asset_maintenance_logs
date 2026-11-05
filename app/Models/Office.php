@@ -16,6 +16,8 @@ class Office extends Model
         'division_id',
     ];
 
+    protected $hidden = ['id'];
+
     public function division(): BelongsTo
     {
         return $this->belongsTo(Division::class);

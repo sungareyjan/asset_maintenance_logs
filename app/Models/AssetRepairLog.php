@@ -10,6 +10,7 @@ class AssetRepairLog extends Model
     use HasFactory;
 
     protected $fillable = [
+        'public_id',
         'requester',
         'office_id',
         'station_location_id',

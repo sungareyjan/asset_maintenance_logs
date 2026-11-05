@@ -10,6 +10,7 @@ class AssetRepairLogEncoding extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'public_id',
         'process_type',
         'asset_repair_log_id',
         'technician_id',
