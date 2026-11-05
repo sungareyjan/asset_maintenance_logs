@@ -2,7 +2,7 @@ import { GridItem, Heading, SimpleGrid, useDisclosure } from "@chakra-ui/react";
 
 import ServiceCard, { ServiceCardData } from "../components/ServiceCard";
 import { useState } from "react";
-import AcceptTaskModal from "@/features/service-request/components/ServiceTaskModal";
+import AcceptTaskModal from "@/features/service-request-repair/components/ServiceTaskModal";
 
 export default function ServiceQueue() {
     const queue: ServiceCardData[] = [

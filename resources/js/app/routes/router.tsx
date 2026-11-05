@@ -5,7 +5,7 @@ export const ROUTES = {
         DashBoard: "/",
         RepairMaintenance: "/repair-maintenance",
         RepairAssessment: "/repair-assessment",
-        ServiceRequest: "/service-request",
+        ServiceRequest: "/service-request-repair",
         ServiceQueue: "/service-queue",
         ExampleForm: "/example-form",
     }

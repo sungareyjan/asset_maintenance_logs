@@ -7,7 +7,7 @@ import { BaseInput } from "@/shared/ui";
 import BaseSelect from "@/shared/ui/base/BaseSelect";
 import BaseTextarea from "@/shared/ui/base/BaseTextarea";
 import BaseCheckboxGroup from "@/shared/ui/base/BaseCheckboxGroup";
-import type { ServiceRequest } from "../../service-request/types/service-request";
+import type { ServiceRequest } from "../../service-request-repair/types/service-request";
 import { useRepairMaintenance } from "../../repair-maintenance/hooks/useRepairMaintenance";
 
 interface TechnicalDiagnosticStepProps {

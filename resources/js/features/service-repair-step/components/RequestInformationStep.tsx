@@ -4,7 +4,7 @@ import {
 } from "@chakra-ui/react";
 import { BaseInput } from "@/shared/ui";
 import BaseSelect from "@/shared/ui/base/BaseSelect";
-import type { ServiceRequest } from "../../service-request/types/service-request";
+import type { ServiceRequest } from "../../service-request-repair/types/service-request";
 import { useRepairMaintenance } from "../../repair-maintenance/hooks/useRepairMaintenance";
 
 interface RequestInformationStepProps {

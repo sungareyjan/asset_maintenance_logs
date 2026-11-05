@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { BaseInput } from "@/shared/ui";
 import BaseTextarea from "@/shared/ui/base/BaseTextarea";
-import type { ServiceRequest } from "../../service-request/types/service-request";
+import type { ServiceRequest } from "../../service-request-repair/types/service-request";
 import { useRepairMaintenance } from "../../repair-maintenance/hooks/useRepairMaintenance";
 import { useState } from "react";
 

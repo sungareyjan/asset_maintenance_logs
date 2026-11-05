@@ -8,7 +8,7 @@ import {
     Divider,
 } from "@chakra-ui/react";
 
-import type { ServiceRequest } from "../../service-request/types/service-request";
+import type { ServiceRequest } from "../../service-request-repair/types/service-request";
 
 import { FaHotel, FaUser } from "react-icons/fa";
 

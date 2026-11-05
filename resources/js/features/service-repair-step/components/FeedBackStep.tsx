@@ -1,26 +1,14 @@
 import {
-    Alert,
-    AlertIcon,
     Box,
-    Button,
-    HStack,
     Text,
-    VStack,
-    Flex,
-    Divider,
     SimpleGrid,
     GridItem,
     Heading,
 } from "@chakra-ui/react";
 import { BaseInput } from "@/shared/ui";
-import { BaseModal } from "@/shared/ui";
-import BaseSelect from "@/shared/ui/base/BaseSelect";
 import BaseRadioGroup from "@/shared/ui/base/BaseRadioGroup";
-import BaseTextarea from "@/shared/ui/base/BaseTextarea";
-import BaseCheckboxGroup from "@/shared/ui/base/BaseCheckboxGroup";
-import type { ServiceRequest } from "../../service-request/types/service-request";
+import type { ServiceRequest } from "../../service-request-repair/types/service-request";
 import { useRepairMaintenance } from "../../repair-maintenance/hooks/useRepairMaintenance";
-import { useState } from "react";
 
 interface FeedBackStepProps {
     request: ServiceRequest | null;
