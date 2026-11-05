@@ -19,9 +19,8 @@ class AssetRepairController extends Controller
     public function createRequestRepair(Request $request)
     {
 
-
         $validated = $request->validate([
-            'requester' => 'required|string|max:50',
+            'requesting_user' => 'required|string|max:50',
 
             'office_id' => [
                 'required',
@@ -34,7 +33,7 @@ class AssetRepairController extends Controller
                 'uuid',
                 'exists:station_locations,public_id',
             ],
-            'description' => 'required|string',
+            'problem_description' => 'required|string',
         ], [
             'office_id.uuid'   => 'Invalid office ID.',
             'office_id.exists' => 'Office does not exist.',
@@ -79,10 +78,10 @@ class AssetRepairController extends Controller
             $repairLog =  AssetRepairLog::create([
                 'public_id'           => $publicId,
                 'repair_control_no'   => $repairControlNo,
-                'requester'           => $validated['requester'],
+                'requester'           => $validated['requesting_user'],
                 'office_id'           => $officeId->id,
                 'station_location_id' => $stationLocationId->id,
-                'description'         => $validated['description']
+                'description'         => $validated['problem_description']
             ]);
 
             $publicId = (string) Str::uuid();
