@@ -16,7 +16,8 @@ use Illuminate\Support\Str;
 class AssetRepairController extends Controller
 {
     //
-    public function createRequestRepair(Request $request){
+    public function createRequestRepair(Request $request)
+    {
 
 
         $validated = $request->validate([
@@ -33,6 +34,7 @@ class AssetRepairController extends Controller
                 'uuid',
                 'exists:station_locations,public_id',
             ],
+            'description' => 'required|string',
         ], [
             'office_id.uuid'   => 'Invalid office ID.',
             'office_id.exists' => 'Office does not exist.',
@@ -42,7 +44,7 @@ class AssetRepairController extends Controller
         ]);
         DB::beginTransaction();
 
-        try{
+        try {
 
             $officeId = Office::select('id')->where(
                 'public_id',
@@ -59,12 +61,12 @@ class AssetRepairController extends Controller
                 'created_at',
                 today()
             )
-            ->orderByDesc('id')
-            ->first();
+                ->orderByDesc('id')
+                ->first();
 
             $sequence = $lastRequest
-            ? ((int) substr($lastRequest->repair_control_no, -3)) + 1
-            : 1;
+                ? ((int) substr($lastRequest->repair_control_no, -3)) + 1
+                : 1;
 
             $today = now()->format('Ymd');
             $repairControlNo = sprintf(
@@ -75,16 +77,17 @@ class AssetRepairController extends Controller
 
             $publicId = (string) Str::uuid();
             $repairLog =  AssetRepairLog::create([
-                'public_id' => $publicId ,
+                'public_id'           => $publicId,
                 'repair_control_no'   => $repairControlNo,
                 'requester'           => $validated['requester'],
                 'office_id'           => $officeId->id,
                 'station_location_id' => $stationLocationId->id,
+                'description'         => $validated['description']
             ]);
 
             $publicId = (string) Str::uuid();
             AssetRepairLogEncoding::create([
-                'public_id' => $publicId ,
+                'public_id' => $publicId,
                 'process_type'        => 'request',
                 'asset_repair_log_id' => $repairLog->id,
                 'technician_id'       => null,
@@ -94,7 +97,19 @@ class AssetRepairController extends Controller
             ]);
 
             DB::commit();
-        }catch(ValidationException $e){
+            return response()->json([
+                'success' => true,
+                'message' => 'Repair request created successfully.',
+                'data' => [
+                    'repair_control_no'   => $repairLog->repair_control_no,
+                    'public_id'           => $repairLog->public_id,
+                    'requester'           => $repairLog->requester,
+                    'office_id'           => $validated['office_id'],
+                    'station_location_id' => $validated['station_location_id'],
+                    'description'         => $repairLog->description,
+                ],
+            ], 201);
+        } catch (ValidationException $e) {
             DB::rollBack();
 
             report($e);
@@ -103,9 +118,7 @@ class AssetRepairController extends Controller
                 'success' => false,
                 'message' => 'An unexpected error occurred.',
                 'error'   => config('app.debug') ? $e->getMessage() : null,
-            ],500);
+            ], 500);
         }
-
-        return "hello";
     }
 }

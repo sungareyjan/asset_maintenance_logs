@@ -16,7 +16,7 @@ class Office extends Model
         'division_id',
     ];
 
-    protected $hidden = ['id'];
+    protected $hidden = ['id','division_id'];
 
     public function division(): BelongsTo
     {
