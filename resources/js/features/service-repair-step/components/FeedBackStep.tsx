@@ -6,7 +6,7 @@ import {
     Heading,
 } from "@chakra-ui/react";
 import { BaseInput } from "@/shared/ui";
-import BaseRadioGroup from "@/shared/ui/base/BaseRadioGroup";
+import BaseRadioGroup from "@/shared/ui/base/form/BaseRadioGroup";
 import type { ServiceRequest } from "../../service-request-repair/types/service-request";
 import { useRepairMaintenance } from "../../repair-maintenance/hooks/useRepairMaintenance";
 

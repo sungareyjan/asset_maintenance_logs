@@ -13,10 +13,10 @@ import {
 
 import { BaseInput } from "@/shared/ui";
 import { useRepairMaintenance } from "../hooks/useRepairMaintenance";
-import BaseSelect from "@/shared/ui/base/BaseSelect";
-import BaseRadioGroup from "@/shared/ui/base/BaseRadioGroup";
-import BaseTextarea from "@/shared/ui/base/BaseTextarea";
-import BaseCheckboxGroup from "@/shared/ui/base/BaseCheckboxGroup";
+import BaseSelect from "@/shared/ui/base/form/BaseSelect";
+import BaseRadioGroup from "@/shared/ui/base/form/BaseRadioGroup";
+import BaseTextarea from "@/shared/ui/base/form/BaseTextarea";
+import BaseCheckboxGroup from "@/shared/ui/base/form/BaseCheckboxGroup";
 import { useState } from "react";
 
 export type RepairMaintenanceForm = {

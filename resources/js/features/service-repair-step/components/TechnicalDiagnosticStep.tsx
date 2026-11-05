@@ -4,9 +4,9 @@ import {
     GridItem,
 } from "@chakra-ui/react";
 import { BaseInput } from "@/shared/ui";
-import BaseSelect from "@/shared/ui/base/BaseSelect";
-import BaseTextarea from "@/shared/ui/base/BaseTextarea";
-import BaseCheckboxGroup from "@/shared/ui/base/BaseCheckboxGroup";
+import BaseSelect from "@/shared/ui/base/form/BaseSelect";
+import BaseTextarea from "@/shared/ui/base/form/BaseTextarea";
+import BaseCheckboxGroup from "@/shared/ui/base/form/BaseCheckboxGroup";
 import type { ServiceRequest } from "../../service-request-repair/types/service-request";
 import { useRepairMaintenance } from "../../repair-maintenance/hooks/useRepairMaintenance";
 

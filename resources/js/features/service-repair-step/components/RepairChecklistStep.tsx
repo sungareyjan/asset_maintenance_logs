@@ -1,4 +1,4 @@
-import BaseCheckboxGroup from "@/shared/ui/base/BaseCheckboxGroup";
+import BaseCheckboxGroup from "@/shared/ui/base/form/BaseCheckboxGroup";
 import { Box, Flex, Grid, Text } from "@chakra-ui/react";
 
 export default function RepairChecklistStep() {

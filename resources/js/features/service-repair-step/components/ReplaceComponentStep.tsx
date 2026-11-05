@@ -9,7 +9,7 @@ import {
     Heading,
 } from "@chakra-ui/react";
 import { BaseInput } from "@/shared/ui";
-import BaseTextarea from "@/shared/ui/base/BaseTextarea";
+import BaseTextarea from "@/shared/ui/base/form/BaseTextarea";
 import type { ServiceRequest } from "../../service-request-repair/types/service-request";
 import { useRepairMaintenance } from "../../repair-maintenance/hooks/useRepairMaintenance";
 import { useState } from "react";
