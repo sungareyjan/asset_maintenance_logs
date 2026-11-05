@@ -29,7 +29,7 @@ return new class extends Migration
                 ->constrained('users')
                 ->nullOnDelete();
 
-            $table->string('status'); // accept the asset, repair the asset
+            $table->string('status'); // encoded, accept the asset, repair the asset
 
             $table->foreignId('encoded_by')
                 ->constrained('users')

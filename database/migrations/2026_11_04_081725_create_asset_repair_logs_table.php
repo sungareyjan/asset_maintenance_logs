@@ -18,18 +18,16 @@ return new class extends Migration
             $table->string('requester');
 
             $table->foreignId('office_id')
-                ->nullable()
                 ->constrained('offices')
                 ->restrictOnDelete();
 
             $table->foreignId('station_location_id')
-                ->nullable()
                 ->constrained('station_locations')
                 ->restrictOnDelete();
 
             $table->string('repair_control_no')->unique();
 
-            $table->string('service_priority');
+            $table->string('service_priority')->nullable();
 
             // Equipment Information
             $table->foreignId('equipment_category_id')
