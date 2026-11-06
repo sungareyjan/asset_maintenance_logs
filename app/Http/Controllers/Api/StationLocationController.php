@@ -10,10 +10,20 @@ class StationLocationController extends Controller
 {
     public function getStationLocation(Request $request){
 
-        $perPage = $request->integer('per_page',10);
-        $search  = $request->input('search');
+        $perPage = $request->integer('per_page', 10);
+        $search = $request->input('search');
 
-        $query = StationLocation::select('public_id','station','address');
+        $query = StationLocation::select(
+            'public_id',
+            'station',
+            'address'
+        );
+
+        if ($search) {
+            $query->where('station', 'ilike', "%{$search}%")
+            ->orWhere('address','ilike',"%{$search}%");
+        }
+
         return $query->paginate($perPage);
 
     }
