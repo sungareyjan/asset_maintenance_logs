@@ -11,7 +11,7 @@ class AssetRepairLog extends Model
 
     protected $fillable = [
         'public_id',
-        'requester',
+        'requesting_user',
         'office_id',
         'station_location_id',
         'repair_control_no',

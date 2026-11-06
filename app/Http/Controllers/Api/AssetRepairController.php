@@ -78,7 +78,7 @@ class AssetRepairController extends Controller
             $repairLog =  AssetRepairLog::create([
                 'public_id'           => $publicId,
                 'repair_control_no'   => $repairControlNo,
-                'requester'           => $validated['requesting_user'],
+                'requesting_user'           => $validated['requesting_user'],
                 'office_id'           => $officeId->id,
                 'station_location_id' => $stationLocationId->id,
                 'description'         => $validated['problem_description']
@@ -102,7 +102,7 @@ class AssetRepairController extends Controller
                 'data' => [
                     'repair_control_no'   => $repairLog->repair_control_no,
                     'public_id'           => $repairLog->public_id,
-                    'requester'           => $repairLog->requester,
+                    'requesting_user'      => $repairLog->requesting_user,
                     'office_id'           => $validated['office_id'],
                     'station_location_id' => $validated['station_location_id'],
                     'description'         => $repairLog->description,

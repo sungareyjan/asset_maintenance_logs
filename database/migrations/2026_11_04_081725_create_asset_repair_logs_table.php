@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('public_id')->unique();
             // Request Information
-            $table->string('requester');
+            $table->string('requesting_user');
 
             $table->foreignId('office_id')
                 ->constrained('offices')
