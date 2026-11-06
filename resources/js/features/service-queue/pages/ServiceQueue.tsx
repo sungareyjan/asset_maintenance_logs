@@ -56,7 +56,7 @@ export default function ServiceQueue() {
                 {/* Queue */}
                 <GridItem>
                     <Heading size="md" mb={3}>
-                        Queue
+                        WAITING
                     </Heading>
 
                     <SimpleGrid columns={{ base: 1, md: 2 , xl:1 }} spacing={3}>
@@ -76,7 +76,7 @@ export default function ServiceQueue() {
                 {/* In Progress */}
                 <GridItem colSpan={{ base: 1, xl: 3 }}>
                     <Heading size="md" mb={3}>
-                        In Progress
+                        NOW SERVING
                     </Heading>
 
                     <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={3}>
