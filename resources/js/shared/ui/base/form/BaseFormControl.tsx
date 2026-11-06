@@ -7,7 +7,8 @@ import {
 interface BaseFormFieldProps {
     children: ReactNode;
     isRequired?: boolean;
-    label: string;
+    isInvalid?:boolean;
+    label: ReactNode;
     error?:string;
 }
 
