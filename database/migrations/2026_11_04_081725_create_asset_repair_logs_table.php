@@ -51,7 +51,7 @@ return new class extends Migration
             //     ->nullable()
             //     ->constrained('users')
             //     ->nullOnDelete();
-
+            $table->enum('status',['QUEUED','IN_PROGRESS','COMPLETED'])->default('QUEUED');
             $table->dateTime('start_task')->nullable();
             $table->dateTime('end_task')->nullable();
 
@@ -61,7 +61,7 @@ return new class extends Migration
 
             // $table->string('received_by');
 
-            $table->unsignedTinyInteger('progress')->default(1); //0-100 percent
+            $table->unsignedTinyInteger('progress')->default(0); //0-100 percent
 
             $table->timestamps();
         });
