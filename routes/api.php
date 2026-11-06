@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::post('/repair',[AssetRepairController::class,'createRequestRepair']);
+Route::get('/repair',[AssetRepairController::class,'getRequestRepair']);
 Route::get('/office',[OfficeController::class,'getOffices']);
 Route::get('/station-location',[StationLocationController::class,'getStationLocation']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

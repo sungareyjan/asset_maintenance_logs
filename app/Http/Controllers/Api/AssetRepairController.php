@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 class AssetRepairController extends Controller
 {
-    //
+
     public function createRequestRepair(Request $request)
     {
 
@@ -119,5 +119,46 @@ class AssetRepairController extends Controller
                 'error'   => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
+    }
+
+    public function getRequestRepair(Request $request)
+    {
+
+        $response = AssetRepairLog::join(
+            'asset_repair_log_encodings',
+            'asset_repair_log_encodings.asset_repair_log_id',
+            'asset_repair_logs.id'
+        )
+        ->join('offices','offices.id','asset_repair_logs.office_id')
+        ->join('users as encoded','encoded.id','asset_repair_log_encodings.encoded_by')
+        ->leftJoin('users as technician','technician.id','asset_repair_log_encodings.technician_id')
+        ->select([
+        'asset_repair_logs.public_id',
+        'asset_repair_logs.repair_control_no',
+        'asset_repair_logs.requesting_user',
+        'asset_repair_logs.status',
+        'asset_repair_logs.created_at',
+        'asset_repair_logs.start_task',
+        'asset_repair_logs.end_task',
+        'asset_repair_logs.progress',
+
+            'asset_repair_log_encodings.public_id as encoding_public_id',
+            'asset_repair_log_encodings.process_type',
+            'asset_repair_log_encodings.status as encoding_status',
+
+            'encoded.id as encoded_by_id',
+            'encoded.name as encoded_by_name',
+
+            'technician.id as technician_id',
+            'technician.name as technician_name',
+        ])
+        ->get();
+
+        // $response = AssetRepairLog::with([
+        //     'encodings.technician',
+        //     'encodings.encodedBy',
+        // ])->get();
+
+        return $response;
     }
 }
