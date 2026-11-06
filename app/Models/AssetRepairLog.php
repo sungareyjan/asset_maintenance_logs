@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\ServiceRequestStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AssetRepairLog extends Model
 {
@@ -31,5 +33,16 @@ class AssetRepairLog extends Model
         'work_performed',
         'technical_action',
         'progress',
+        'status' => ServiceRequestStatus::class,
     ];
+
+    protected $hidden = ['id', 'office_id', 'station_location_id'];
+
+    public function encodings(): HasMany
+    {
+        return $this->hasMany(
+            AssetRepairLogEncoding::class,
+            'asset_repair_log_id'
+        );
+    }
 }
