@@ -40,6 +40,7 @@ export function DataTable<T>({
         <TableContainer
             width="100%"
             overflowX="auto"
+            minH="300px"
         >
             <Table
                 size="sm"
