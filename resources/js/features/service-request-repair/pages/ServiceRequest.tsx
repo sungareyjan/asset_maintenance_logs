@@ -8,221 +8,46 @@ import {
     useDisclosure,
 } from "@chakra-ui/react";
 
-import {
-    FiPlus,
-} from "react-icons/fi";
+import { FiPlus } from "react-icons/fi";
+import { useState } from "react";
 
 import {
     DataTable,
     Pagination,
-    StatusBadge,
-    type DataTableColumn,
 } from "@/shared/ui/date-display";
+
 import ServiceRequestSummary from "../components/ServiceRequestSummary";
 import ServiceRequestToolbar from "../components/ServiceRequestToolbar";
-import ServiceRequestModal, {
-} from "../components/ServiceRequestModal";
-import { useState } from "react";
+import ServiceRequestModal from "../components/ServiceRequestModal";
 import AcceptTaskModal from "../components/ServiceTaskModal";
 
+import { useServiceRequests } from "../hooks/useServiceRequests";
+import { serviceRequestColumns } from "../config/serviceRequestColumns";
 
-type ServiceRequest = {
-    id: string;
-    requester: string;
-    office: string;
-    asset: string;
-    technician:string;
-    acceptTaskTime:string;
-    priority: "Urgent" | "High" | "Normal" | "Low";
-    status:
-        | "Queued"
-        | "In Progress"
-        | "Completed";
-    dateRequested: string;
-};
-
-const serviceRequests: ServiceRequest[] = [
-    {
-        id: "SR-2026-00001",
-        requester: "Juan Dela Cruz",
-        office: "ICTU",
-        asset: "PC-001",
-        priority: "High",
-        status: "Queued",
-        dateRequested: "Nov 2, 2026",
-        acceptTaskTime:"",
-        technician: "",
-    },
-    {
-        id: "SR-2026-00002",
-        requester: "Maria Santos",
-        office: "FCA",
-        asset: "LAP-021",
-        priority: "Normal",
-        status: "In Progress",
-        dateRequested: "Nov 2, 2026",
-        acceptTaskTime:"",
-        technician: "",
-    },
-    {
-        id: "SR-2026-00003",
-        requester: "Pedro Cruz",
-        office: "PMED",
-        asset: "PC-014",
-        priority: "Urgent",
-        status: "In Progress",
-        dateRequested: "Nov 1, 2026",
-        acceptTaskTime:"",
-        technician: "",
-    },
-    {
-        id: "SR-2026-00004",
-        requester: "Ana Reyes",
-        office: "RAED",
-        asset: "PRN-005",
-        priority: "Low",
-        status: "Completed",
-        dateRequested: "Oct 31, 2026",
-        acceptTaskTime:"",
-        technician: "",
-    },
-];
-
-const priorityColorMap = {
-    Urgent: "red",
-    High: "orange",
-    Normal: "blue",
-    Low: "gray",
-};
-
-const columns: DataTableColumn<ServiceRequest>[] = [
-    {
-        key: "id",
-        label: "Request",
-        width: "150px",
-        render: (request) => (
-            <Text
-                fontSize="sm"
-                fontWeight="600"
-                color="blue.600"
-            >
-                {request.id}
-            </Text>
-        ),
-    },
-    {
-        key: "requester",
-        label: "Requester",
-        render: (request) => (
-            <Text
-                fontSize="sm"
-                fontWeight="500"
-                color="gray.700"
-            >
-                {request.requester}
-            </Text>
-        ),
-    },
-    {
-        key: "office",
-        label: "Office / Division",
-        render: (request) => (
-            <Text
-                fontSize="sm"
-                color="gray.600"
-            >
-                {request.office}
-            </Text>
-        ),
-    },
-    {
-        key: "asset",
-        label: "Asset",
-        render: (request) => (
-            <Text
-                fontSize="sm"
-                fontFamily="mono"
-                color="gray.600"
-            >
-                {request.asset}
-            </Text>
-        ),
-    },
-    {
-        key: "priority",
-        label: "Priority",
-        render: (request) => (
-            <Box
-                display="inline-flex"
-                px={2}
-                py={1}
-                borderRadius="md"
-                bg={`${priorityColorMap[request.priority]}.50`}
-                color={`${priorityColorMap[request.priority]}.600`}
-                fontSize="xs"
-                fontWeight="600"
-            >
-                {request.priority}
-            </Box>
-        ),
-    },
-    {
-        key: "status",
-        label: "Status",
-        render: (request) => (
-            <StatusBadge status={request.status} />
-        ),
-    },
-    {
-        key: "dateRequested",
-        label: "Date Requested",
-        render: (request) => (
-            <Text
-                fontSize="sm"
-                color="gray.600"
-            >
-                {request.dateRequested}
-            </Text>
-        ),
-    },
-    {
-        key: "technician",
-        label: "Technician",
-        render: (request) => (
-            <Text fontSize="sm" textAlign="center" color="gray.600">
-                {request.technician || "—"}
-            </Text>
-        ),
-    },
-    {
-        key: "accepted_at",
-        label: "Accepted At",
-        render: (request) => (
-            <Text fontSize="sm" textAlign="center" color="gray.600">
-                {request.acceptTaskTime || "—"}
-            </Text>
-        ),
-    },
-];
+import type { ServiceRequestRepair } from "../types/service-repair";
 
 export default function ServiceRequest() {
-
     const addModal = useDisclosure();
     const acceptTaskModal = useDisclosure();
 
     const [selectedRequest, setSelectedRequest] =
-    useState<ServiceRequest | null>(null);
+        useState<ServiceRequestRepair | null>(null);
 
-    const handleOpenAcceptModal = (request: ServiceRequest) => {
+    const {
+        serviceRequests,
+        fetchServiceRequests,
+    } = useServiceRequests();
+
+    const handleOpenAcceptModal = (
+        request: ServiceRequestRepair
+    ) => {
         setSelectedRequest(request);
         acceptTaskModal.onOpen();
     };
 
     return (
         <Box>
-            {/* =====================================================
-                PAGE HEADER
-            ====================================================== */}
+            {/* Page Header */}
             <Flex
                 direction={{
                     base: "column",
@@ -255,25 +80,20 @@ export default function ServiceRequest() {
 
                 <Spacer />
 
-                    <Button
-                        leftIcon={<FiPlus />}
-                        colorScheme="blue"
-                        size="sm"
-                        onClick={addModal.onOpen}
-                    >
-                        New Request
-                    </Button>
+                <Button
+                    leftIcon={<FiPlus />}
+                    colorScheme="blue"
+                    size="sm"
+                    onClick={addModal.onOpen}
+                >
+                    New Request
+                </Button>
             </Flex>
 
-            {/* =====================================================
-                SUMMARY
-            ====================================================== */}
+            {/* Summary */}
+            <ServiceRequestSummary />
 
-            <ServiceRequestSummary/>
-
-            {/* =====================================================
-                TABLE CONTAINER
-            ====================================================== */}
+            {/* Table */}
             <Box
                 bg="white"
                 border="1px"
@@ -281,41 +101,41 @@ export default function ServiceRequest() {
                 borderRadius="lg"
                 overflow="hidden"
             >
-                <ServiceRequestToolbar/>
-                {/* Data Table */}
+                <ServiceRequestToolbar />
+
                 <DataTable
                     data={serviceRequests}
-                    columns={columns}
+                    columns={serviceRequestColumns}
                     getRowKey={(request) =>
-                        request.id
+                        request.public_id
                     }
                     onRowClick={handleOpenAcceptModal}
                     emptyMessage="No service requests found."
                 />
 
-                {/* Pagination */}
                 <Pagination
                     page={1}
                     perPage={10}
                     total={128}
                     onPageChange={(page) => {
-                        console.log(
-                            "Page:",
-                            page
-                        );
+                        console.log("Page:", page);
                     }}
                 />
             </Box>
-            {/* SERVICE REQUEST MODAL */}
+
+            {/* New Request */}
             <ServiceRequestModal
                 isOpen={addModal.isOpen}
                 onClose={addModal.onClose}
                 onSubmit={(data) => {
                     console.log(data);
                     addModal.onClose();
+
+                    fetchServiceRequests();
                 }}
             />
 
+            {/* Accept Task */}
             <AcceptTaskModal
                 isOpen={acceptTaskModal.isOpen}
                 onClose={() => {
