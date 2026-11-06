@@ -2,280 +2,233 @@ import {
     Box,
     Menu,
     MenuButton,
-    MenuList,
     MenuItem,
+    MenuList,
+    Text,
     useDisclosure,
-    Text
 } from "@chakra-ui/react";
-import  InputField from "./InputField";
-import { Spinner } from "@/shared/ui"
-import { useEffect, useRef, useState, ReactNode, useCallback } from "react";
-import axios from "axios";
 
-export type Option = {
-    value: string;
-    label: string;
-    [key: string]: unknown;
-};
+import InputField from "./InputField";
+import { Spinner } from "@/shared/ui";
 
-export type SearchSelectFieldProps<T> = {
-    value: Option | null;
-    onChange: (option: Option | null) => void;
-    endpoint: string;
+import type { SearchSelectFieldProps } from "@/shared/types/search-select";
+import { useSearchSelect } from "@/shared/hooks/useSearchSelect";
 
-    getOptionValue: (item: T) => string;
-    getOptionLabel: (item: T) => string;
-    getOptionExtra?: (item: T) => Record<string, unknown>;
+import BaseFormControl from "../form/BaseFormControl";
 
-    leftAddon?: string | ReactNode;
-    placeholder?: string;
-    isInvalid?: boolean;
-    background?: string;
-    isReadOnly?: boolean;
-};
+export default function BaseSelectSearch<T>({
+    label,
+    isRequired = false,
+    value,
+    onChange,
+    endpoint,
+    getOptionValue,
+    getOptionLabel,
+    getOptionExtra,
+    leftAddon,
+    placeholder = "Select...",
+    isInvalid = false,
+    background = "white",
+    isReadOnly = false,
+}: SearchSelectFieldProps<T>) {
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
-type CacheEntry = {
-    options: Option[];
-    currentPage: number;
-    hasMore: boolean;
-};
-
-export default function SearchSelectField<T>({
-        value,
-        onChange,
+    const {
+        search,
+        setSearch,
+        options,
+        loading,
+        handleScroll,
+    } = useSearchSelect({
         endpoint,
         getOptionValue,
         getOptionLabel,
         getOptionExtra,
-        leftAddon,
-        placeholder = "Select...",
-        isInvalid = false,
-        background,
-        isReadOnly = false,
-}: SearchSelectFieldProps<T>) {
-    const { isOpen, onOpen, onClose } = useDisclosure();
-
-    const [search, setSearch] = useState("");
-    const [options, setOptions] = useState<Option[]>([]);
-    const [hasMore, setHasMore] = useState(true);
-    const [loading, setLoading] = useState(false);
-
-    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const fetchingRef = useRef(false);
-    const currentPageRef = useRef(1);
-
-    const cacheRef = useRef<Record<string, CacheEntry>>({});
-
-    const fetchOptions = useCallback(
-        async (searchText = "", pageNum = 1, append = false) => {
-            const trimmedSearch = searchText.trim().toLowerCase();
-
-            if (pageNum === 1 && !append && cacheRef.current[trimmedSearch]) {
-                const cached = cacheRef.current[trimmedSearch];
-                setOptions(cached.options);
-                setHasMore(cached.hasMore);
-                currentPageRef.current = cached.currentPage;
-                return;
-            }
-
-            if (fetchingRef.current) return;
-
-            try {
-                fetchingRef.current = true;
-                setLoading(true);
-
-                const res = await axios.get(endpoint, {
-                    params: {
-                        search: searchText,
-                        page: pageNum,
-                    },
-                });
-
-                console.log(res);
-
-                const newData: Option[] = (res.data?.data || []).map(
-                    (item: T) => ({
-                        value: getOptionValue(item),
-                        label: getOptionLabel(item),
-                        ...(getOptionExtra ? getOptionExtra(item) : {}),
-                    })
-                );
-                const currentPage = res.data?.current_page || 1;
-                const lastPage = res.data?.last_page || 1;
-                const computedHasMore = currentPage < lastPage;
-
-                setOptions((prev) => {
-                    const updatedOptions = append
-                        ? [...prev, ...newData]
-                        : newData;
-
-                    cacheRef.current[trimmedSearch] = {
-                        options: updatedOptions,
-                        currentPage,
-                        hasMore: computedHasMore,
-                    };
-
-                    return updatedOptions;
-                });
-
-                setHasMore(computedHasMore);
-                currentPageRef.current = currentPage;
-            } catch (error) {
-                console.error("Failed to fetch options:", error);
-            } finally {
-                setLoading(false);
-                fetchingRef.current = false;
-            }
-        },
-        [endpoint, getOptionValue, getOptionLabel, getOptionExtra]
-    );
-
-    useEffect(() => {
-        if (!isOpen) {
-            setSearch("");
-            return;
-        }
-
-        const trimmedSearch = search.trim().toLowerCase();
-        if (cacheRef.current[trimmedSearch]) {
-            const cached = cacheRef.current[trimmedSearch];
-            setOptions(cached.options);
-            setHasMore(cached.hasMore);
-            currentPageRef.current = cached.currentPage;
-        } else {
-            setOptions([]);
-            currentPageRef.current = 1;
-            setHasMore(true);
-            fetchOptions(search, 1, false);
-        }
-    }, [isOpen, fetchOptions]);
-
-    useEffect(() => {
-        if (!isOpen) return;
-
-        if (debounceRef.current) {
-            clearTimeout(debounceRef.current);
-        }
-
-        debounceRef.current = setTimeout(() => {
-            const trimmedSearch = search.trim().toLowerCase();
-
-            if (cacheRef.current[trimmedSearch]) {
-                const cached = cacheRef.current[trimmedSearch];
-                setOptions(cached.options);
-                setHasMore(cached.hasMore);
-                currentPageRef.current = cached.currentPage;
-            } else {
-                currentPageRef.current = 1;
-                fetchOptions(search, 1, false);
-            }
-        }, 400);
-
-        return () => {
-            if (debounceRef.current) {
-                clearTimeout(debounceRef.current);
-            }
-        };
-    }, [search, isOpen, fetchOptions]);
-
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        const el = e.currentTarget;
-        const bottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
-
-        if (!bottom || loading || !hasMore) return;
-
-        const nextPage = currentPageRef.current + 1;
-        fetchOptions(search, nextPage, true);
-    };
+        isOpen,
+    });
 
     return (
-        <Menu
-            isOpen={isOpen}
-            onClose={onClose}
-            placement="bottom-start"
-            autoSelect={false}
-            closeOnSelect={false}
-        >
-            <MenuButton
-                w="full"
-                border="2px"
-                borderColor={
-                    isInvalid ? "red.500" : isOpen ? "green.500" : "gray.300"
+            <BaseFormControl
+                label={
+                    <Text>
+                        {label}{" "}
+                        {isRequired && (
+                            <Text as="span" color="red.500">
+                                *
+                            </Text>
+                        )}
+                    </Text>
                 }
-                _focusWithin={{
-                    borderColor: isInvalid ? "red.500" : "green.500",
-                }}
-                borderRadius="md"
-                p={2}
-                boxShadow="0 2px 4px rgba(0,0,0,0.03)"
-                bg={background}
-                cursor="pointer"
-                onClick={
-                    isReadOnly
-                        ? undefined
-                        : isOpen
-                            ? onClose
-                            : onOpen
-                }
-                color={value ? "inherit" : "gray.500"}
             >
-                {value?.label || placeholder}
-            </MenuButton>
-            <MenuList p={2} onMouseDown={(e) => e.stopPropagation()}>
-                <InputField
-                    size="sm"
-                    placeholder="Search..."
+            <Menu
+                isOpen={isOpen}
+                onClose={onClose}
+                placement="bottom-start"
+                autoSelect={false}
+                closeOnSelect={false}
+            >
+                <MenuButton
+                    type="button"
+                    w="full"
+                    h="10"
+                    minH="10"
+                    border="2px"
+                    borderWidth={isInvalid ? "3px" : "2px"}
+                    borderColor={
+                        isInvalid
+                            ? "red.500"
+                            : isOpen
+                                ? "#1F67D1"
+                                : "gray.300"
+                    }
                     borderRadius="md"
-                    value={search}
-                    onChange={setSearch}
-                    mb={1}
-                    leftAddon={leftAddon}
-                    autoFocus
-                />
+                    px={3}
+                    py={2}
+                    textAlign="left"
+                    justifyContent="flex-start"
+                    fontWeight="normal"
+                    bg={background}
+                    color={
+                        value
+                            ? "inherit"
+                            : "gray.500"
+                    }
+                    cursor={
+                        isReadOnly
+                            ? "not-allowed"
+                            : "pointer"
+                    }
+                    // isDisabled={isReadOnly}
+                    boxShadow="0 2px 4px rgba(0,0,0,0.03)"
+                    _hover={{
+                        borderColor: isInvalid
+                            ? "red.500"
+                            : isOpen
+                                ? "#1F67D1"
+                                : "gray.400",
+                    }}
+                    _focus={{
+                        borderColor: isInvalid
+                            ? "red.500"
+                            : "#1F67D1",
+                        boxShadow: "none",
+                    }}
+                    _focusVisible={{
+                        borderColor: isInvalid
+                            ? "red.500"
+                            : "#1F67D1",
+                        boxShadow: "none",
+                    }}
+                    onClick={
+                        isReadOnly
+                            ? undefined
+                            : isOpen
+                                ? onClose
+                                : onOpen
+                    }
+                >
+                    <Box
+                        w="full"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                        whiteSpace="nowrap"
+                    >
+                        {value?.label || placeholder}
+                    </Box>
+                </MenuButton>
 
-                <Box maxH="300px" overflowY="auto" onScroll={handleScroll}>
-                    {value && (
-                        <MenuItem
-                            color="red.500"
-                            onClick={() => {
-                                onChange(null);
-                                onClose();
-                            }}
-                        >
-                            Clear selection
-                        </MenuItem>
-                    )}
+                <MenuList
+                    p={2}
+                    maxW="100%"
+                    onMouseDown={(event) => {
+                        event.stopPropagation();
+                    }}
+                >
+                    <InputField
+                        size="sm"
+                        placeholder="Search..."
+                        borderRadius="md"
+                        value={search}
+                        onChange={setSearch}
+                        mb={1}
+                        leftAddon={leftAddon}
+                        autoFocus
+                    />
 
-                    {options.map((opt) => {
-                        const isSelected = value?.value === opt.value;
-
-                        return (
+                    <Box
+                        maxH="300px"
+                        overflowY="auto"
+                        onScroll={handleScroll}
+                    >
+                        {value && (
                             <MenuItem
-                                key={opt.value}
+                                borderRadius="md"
+                                color="red.500"
                                 onClick={() => {
-                                    onChange(opt);
+                                    onChange(null);
                                     onClose();
                                 }}
-                                bg={isSelected ? "green.500" : undefined}
-                                color={isSelected ? "white" : undefined}
                             >
-                                {opt.label}
+                                Clear selection
                             </MenuItem>
-                        );
-                    })}
+                        )}
 
-                    {loading && (
-                        <Box textAlign="center" py={2}>
-                            <Spinner size="sm" />
-                        </Box>
-                    )}
-                    {!loading && options.length === 0 && (
-                        <Text fontSize="sm" color="gray.500" p={2}>
-                            No results
-                        </Text>
-                    )}
-                </Box>
-            </MenuList>
-        </Menu>
+                        {options.map((option) => {
+                            const isSelected =
+                                value?.value ===
+                                option.value;
+
+                            return (
+                                <MenuItem
+                                    key={option.value}
+                                    borderRadius="md"
+                                    bg={
+                                        isSelected
+                                            ? "#1F67D1"
+                                            : undefined
+                                    }
+                                    color={
+                                        isSelected
+                                            ? "white"
+                                            : undefined
+                                    }
+                                    _hover={{
+                                        bg: isSelected
+                                            ? "#1857B8"
+                                            : "gray.100",
+                                    }}
+                                    onClick={() => {
+                                        onChange(option);
+                                        onClose();
+                                    }}
+                                >
+                                    {option.label}
+                                </MenuItem>
+                            );
+                        })}
+
+                        {loading && (
+                            <Box
+                                textAlign="center"
+                                py={2}
+                            >
+                                <Spinner size="sm" />
+                            </Box>
+                        )}
+
+                        {!loading &&
+                            options.length === 0 && (
+                                <Text
+                                    fontSize="sm"
+                                    color="gray.500"
+                                    p={2}
+                                >
+                                    No results
+                                </Text>
+                            )}
+                    </Box>
+                </MenuList>
+            </Menu>
+        </BaseFormControl>
     );
 }
