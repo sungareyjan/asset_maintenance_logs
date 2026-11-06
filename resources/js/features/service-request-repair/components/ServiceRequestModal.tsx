@@ -3,201 +3,163 @@ import {
     FormControl,
     FormLabel,
     Input,
+    SimpleGrid,
     Text,
     VStack,
-    SimpleGrid,
     GridItem,
 } from "@chakra-ui/react";
-import axios from "axios";
-import { useState, type FormEvent } from "react";
 
 import type { StationLocation } from "../types/station-location";
-import { useOffices } from "../hooks/useOffices";
-
-import {
-    BaseModal,
-    BaseSelectSearch,
-    BaseTextarea,
-} from "@/shared/ui";
-import BaseSelect from "@/shared/ui/base/form/BaseSelect";
-
+import type { Office } from "../types/office";
+import { useServiceRequestForm } from "../hooks/useServiceRequestForm";
+import { BaseModal, BaseSelectSearch, BaseTextarea } from "@/shared/ui";
+import { useToast } from "@chakra-ui/react";
 interface ServiceRequestModalProps {
     isOpen: boolean;
     onClose: () => void;
-}
-
-interface Option {
-    value: string;
-    label: string;
-    [key: string]: unknown;
 }
 
 export default function ServiceRequestModal({
     isOpen,
     onClose,
 }: ServiceRequestModalProps) {
-    const [stationLocation, setStationLocation] =
-        useState<Option | null>(null);
-
-    const { offices } = useOffices();
-
-    const officeOptions = offices.map((office) => ({
-        label: `${office.office} (${office.code})`,
-        value: office.public_id,
-    }));
-
-    const handleSubmit = async (
-        event: FormEvent<HTMLFormElement>
-    ) => {
-        event.preventDefault();
-
-        try {
-            const formData = new FormData(event.currentTarget);
-
-            const payload = {
-                requesting_user: String(
-                    formData.get("requestingUser") ?? ""
-                ),
-
-                office_id: String(
-                    formData.get("officeDivision") ?? ""
-                ),
-
-                station_location_id:
-                    stationLocation?.value ?? "",
-
-                problem_description: String(
-                    formData.get("problemDescription") ?? ""
-                ),
-            };
-
-            await axios.post(
-                "/api/repair",
-                payload
-            );
-
-            onClose();
-            // Reset station selection after successful submission
-            setStationLocation(null);
-        } catch (error) {
-            console.error(
-                "Failed to submit repair request:",
-                error
-            );
-        }
-    };
-
+    const {
+        stationLocation,
+        setStationLocation,
+        office,
+        setOffice,
+        requestingUser,
+        setRequestingUser,
+        problemDescription,
+        setProblemDescription,
+        submitted,
+        handleSave,
+        resetForm
+    } = useServiceRequestForm();
+    const toast = useToast();
     return (
         <BaseModal
             isOpen={isOpen}
             onClose={onClose}
             title="New Service Request"
             description="Fill in the required information to submit a service request."
-            size="3xl"
-            onSubmit={handleSubmit}
+            size="4xl"
             footer={
                 <>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={onClose}
-                    >
+                    <Button type="button" variant="ghost" onClick={onClose}>
                         Cancel
                     </Button>
 
                     <Button
-                        type="submit"
+                        type="button"
                         colorScheme="blue"
+                        onClick={async () => {
+                            const success = await handleSave();
+
+                            if (success) {
+                                toast({
+                                    title: "Request submitted",
+                                    description:
+                                        "Your service request has been submitted successfully.",
+                                    status: "success",
+                                    duration: 3000,
+                                    isClosable: true,
+                                    position: "top-right",
+                                });
+                                resetForm();
+                                onClose();
+                            }
+                        }}
                     >
                         Submit Request
                     </Button>
                 </>
             }
         >
-            <VStack spacing={6} align="stretch">
-
-                {/* SECTION 1 — Request Information */}
-                <VStack
-                    align="stretch"
+            {/* Request Information */}
+            <VStack align="stretch" spacing={4}>
+                <SimpleGrid
+                    columns={{
+                        base: 1,
+                        md: 2,
+                    }}
                     spacing={4}
                 >
-                    <SimpleGrid
-                        columns={{
+                    {/* Requesting User */}
+                    <FormControl
+                        isRequired
+                        isInvalid={submitted && !requestingUser.trim()}
+                    >
+                        <FormLabel>Requesting User</FormLabel>
+
+                        <Input
+                            name="requestingUser"
+                            value={requestingUser}
+                            onChange={(event) =>
+                                setRequestingUser(event.target.value)
+                            }
+                            placeholder="Enter requesting user"
+                        />
+                    </FormControl>
+
+                    {/* Office */}
+                    <BaseSelectSearch<Office>
+                        isRequired
+                        isInvalid={submitted && !office}
+                        label="Office / Division / Unit"
+                        placeholder="Select Office / Division / Unit"
+                        value={office}
+                        onChange={(option) => {
+                            setOffice(option);
+                        }}
+                        endpoint="/api/office"
+                        getOptionValue={(item) => item.public_id}
+                        getOptionLabel={(item) => item.office}
+                    />
+
+                    {/* Station Location */}
+                    <GridItem
+                        colSpan={{
                             base: 1,
                             md: 2,
                         }}
-                        spacing={4}
                     >
-                        {/* Requesting User */}
-                        <FormControl isRequired>
-                            <FormLabel>
-                                Requesting User
-                            </FormLabel>
-
-                            <Input
-                                name="requestingUser"
-                                placeholder="Enter requesting user"
-                            />
-                        </FormControl>
-
-                        {/* Office / Division / Unit */}
-                        <BaseSelect
+                        <BaseSelectSearch<StationLocation>
                             isRequired
-                            name="officeDivision"
-                            label="Office / Division / Unit"
-                            placeholder="Select office / division / unit"
-                            options={officeOptions}
-                        />
-
-                        {/* Station / Location */}
-                        <GridItem
-                            colSpan={{
-                                base: 1,
-                                md: 2,
+                            isInvalid={submitted && !stationLocation}
+                            label="Station Location"
+                            placeholder="Select station / location"
+                            value={stationLocation}
+                            onChange={(option) => {
+                                setStationLocation(option);
                             }}
-                        >
-                            <BaseSelectSearch<StationLocation>
-                                placeholder="Select station / location"
-                                value={stationLocation}
-                                onChange={(option) => {
-                                    setStationLocation(option);
-                                }}
-                                endpoint="/api/station-location"
-                                getOptionValue={(item) =>
-                                    item.public_id
-                                }
-                                getOptionLabel={(item) =>
-                                    item.station
-                                }
-                            />
-                        </GridItem>
-                    </SimpleGrid>
-                </VStack>
+                            endpoint="/api/station-location"
+                            getOptionValue={(item) => item.public_id}
+                            getOptionLabel={(item) => item.station}
+                        />
+                    </GridItem>
+                </SimpleGrid>
+            </VStack>
 
-                {/* SECTION 2 — Reported Problem */}
-                <VStack
-                    align="stretch"
-                    spacing={4}
-                >
-                    <BaseTextarea
-                        name="problemDescription"
-                        label="Problem Description"
-                        placeholder="Describe the problem encountered, observed symptoms, error messages, or other relevant details."
-                        isRequired
-                        rows={5}
-                        resize="vertical"
-                    />
+            {/* Problem Description */}
+            <VStack align="stretch" spacing={4}>
+                <BaseTextarea
+                    label="Problem Description"
+                    value={problemDescription}
+                    onChange={(event) =>
+                        setProblemDescription(event.target.value)
+                    }
+                    placeholder="Describe the problem encountered, observed symptoms, error messages, or other relevant details."
+                    isRequired
+                    isInvalid={submitted && !problemDescription.trim()}
+                    rows={5}
+                    resize="vertical"
+                />
 
-                    <Text
-                        fontSize="xs"
-                        color="gray.500"
-                        mt={-2}
-                    >
-                        Provide enough details to help the
-                        technical team understand the issue.
-                    </Text>
-                </VStack>
-
+                <Text fontSize="xs" color="gray.500" mt={-2}>
+                    Provide enough details to help the technical team understand
+                    the issue.
+                </Text>
             </VStack>
         </BaseModal>
     );
