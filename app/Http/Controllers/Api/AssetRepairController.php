@@ -124,6 +124,8 @@ class AssetRepairController extends Controller
     public function getRequestRepair(Request $request)
     {
 
+        $perPage = $request->integer('per_page',10);
+
         $response = AssetRepairLog::join(
             'asset_repair_log_encodings',
             'asset_repair_log_encodings.asset_repair_log_id',
@@ -141,6 +143,8 @@ class AssetRepairController extends Controller
         'asset_repair_logs.start_task',
         'asset_repair_logs.end_task',
         'asset_repair_logs.progress',
+        'asset_repair_logs.asset_tag_code',
+        'offices.office',
 
             'asset_repair_log_encodings.public_id as encoding_public_id',
             'asset_repair_log_encodings.process_type',
@@ -151,14 +155,13 @@ class AssetRepairController extends Controller
 
             'technician.id as technician_id',
             'technician.name as technician_name',
-        ])
-        ->get();
+        ]);
 
+        return $response->paginate($perPage);
         // $response = AssetRepairLog::with([
         //     'encodings.technician',
         //     'encodings.encodedBy',
         // ])->get();
 
-        return $response;
     }
 }
